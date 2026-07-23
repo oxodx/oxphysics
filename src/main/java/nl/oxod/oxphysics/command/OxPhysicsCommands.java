@@ -50,7 +50,7 @@ public final class OxPhysicsCommands {
 
   private static void spawnPhysicsBlock(ServerLevel level, BlockPos pos, BlockState blockState) {
     var display = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
-    display.setPos(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+    display.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
 
     var collisionShape = blockState.getCollisionShape(level, pos);
     MinecraftShape.Convex shape;
