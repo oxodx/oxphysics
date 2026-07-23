@@ -13,9 +13,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.block.state.BlockState;
+import nl.oxod.oxphysics.api.BlockDisplayPhysicsAccessor;
+import nl.oxod.oxphysics.api.EntityPhysicsElement;
 import nl.oxod.oxphysics.bullet.collision.body.EntityRigidBody;
 import nl.oxod.oxphysics.mixin.BlockDisplayMixin;
-import nl.oxod.oxphysics.mixin.BlockDisplayPhysicsMixin;
 
 public final class OxPhysicsCommands {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context,
@@ -25,16 +26,21 @@ public final class OxPhysicsCommands {
             .then(Commands.argument("pos", BlockPosArgument.blockPos())
                 .then(Commands.argument("block", BlockStateArgument.block(context))
                     .executes(ctx -> {
-                      var pos = BlockPosArgument.getLoadedBlockPos(ctx, "pos");
-                      var blockInput = BlockStateArgument.getBlock(ctx, "block");
-                      var blockState = blockInput.getState();
-                      var level = ctx.getSource().getLevel();
+                      try {
+                        var pos = BlockPosArgument.getLoadedBlockPos(ctx, "pos");
+                        var blockInput = BlockStateArgument.getBlock(ctx, "block");
+                        var blockState = blockInput.getState();
+                        var level = ctx.getSource().getLevel();
 
-                      spawnPhysicsBlock(level, pos, blockState);
-                      ctx.getSource().sendSuccess(
-                          () -> Component.literal("Spawned physics block at " + pos.getX() + " " + pos.getY() + " " + pos.getZ()),
-                          true);
-                      return 1;
+                        spawnPhysicsBlock(level, pos, blockState);
+                        ctx.getSource().sendSuccess(
+                            () -> Component.literal("Spawned physics block at " + pos.getX() + " " + pos.getY() + " " + pos.getZ()),
+                            true);
+                        return 1;
+                      } catch (Exception e) {
+                        nl.oxod.oxphysics.OxPhysics.LOGGER.error("Failed to spawn physics block", e);
+                        throw new RuntimeException(e);
+                      }
                     })))));
   }
 
@@ -42,11 +48,11 @@ public final class OxPhysicsCommands {
     var display = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
     display.setPos(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
 
-    var physicsMixin = (BlockDisplayPhysicsMixin) (Object) display;
-    physicsMixin.physics$setBlockState(blockState);
+    var physicsAccessor = (BlockDisplayPhysicsAccessor) (Object) display;
+    physicsAccessor.physics$setBlockState(blockState);
 
-    var rigidBody = new EntityRigidBody(physicsMixin);
-    physicsMixin.physics$setRigidBody(rigidBody);
+    var rigidBody = new EntityRigidBody((EntityPhysicsElement) display);
+    physicsAccessor.physics$setRigidBody(rigidBody);
 
     var blockAccessor = (BlockDisplayMixin) (Object) display;
     display.getEntityData().set(blockAccessor.getDataBlockStateId(), blockState);

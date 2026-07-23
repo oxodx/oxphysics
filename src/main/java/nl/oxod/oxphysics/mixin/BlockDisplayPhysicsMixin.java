@@ -9,12 +9,13 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import nl.oxod.oxphysics.api.BlockDisplayPhysicsAccessor;
 import nl.oxod.oxphysics.api.EntityPhysicsElement;
 import nl.oxod.oxphysics.bullet.collision.body.EntityRigidBody;
 import nl.oxod.oxphysics.bullet.collision.body.shape.MinecraftShape;
 
 @Mixin(Display.BlockDisplay.class)
-public abstract class BlockDisplayPhysicsMixin extends Entity implements EntityPhysicsElement {
+public abstract class BlockDisplayPhysicsMixin extends Entity implements EntityPhysicsElement, BlockDisplayPhysicsAccessor {
   private BlockDisplayPhysicsMixin(EntityType<?> type, Level level) {
     super(type, level);
   }
