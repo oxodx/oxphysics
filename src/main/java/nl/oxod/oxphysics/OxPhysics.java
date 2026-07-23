@@ -2,6 +2,7 @@ package nl.oxod.oxphysics;
 
 import net.fabricmc.api.ModInitializer;
 import nl.oxod.oxphysics.bullet.natives.NativeLoader;
+import nl.oxod.oxphysics.entity.OxPhysicsEntities;
 import nl.oxod.oxphysics.event.ServerEventHandler;
 
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ public class OxPhysics implements ModInitializer {
 		java.util.logging.LogManager.getLogManager().reset();
 
 		NativeLoader.load();
+		OxPhysicsEntities.register();
 		ServerEventHandler.register();
 	}
 }

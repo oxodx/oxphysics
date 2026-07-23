@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -15,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import nl.oxod.oxphysics.command.OxPhysicsCommands;
 import nl.oxod.oxphysics.api.EntityPhysicsElement;
 import nl.oxod.oxphysics.api.event.ServerEvents;
 import nl.oxod.oxphysics.api.event.collision.PhysicsSpaceEvents;
@@ -42,6 +44,9 @@ public final class ServerEventHandler {
     PhysicsSpaceEvents.STEP.register(PressureGenerator::step);
     PhysicsSpaceEvents.STEP.register(TerrainGenerator::step);
     PhysicsSpaceEvents.ELEMENT_ADDED.register(ServerEventHandler::onElementAddedToSpace);
+
+    // Commands
+    CommandRegistrationCallback.EVENT.register(OxPhysicsCommands::register);
 
     // Server Events
     ServerLifecycleEvents.SERVER_STARTING.register(ServerEventHandler::onServerStart);

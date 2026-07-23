@@ -5,6 +5,7 @@
 	"mixins": [
 		"LevelMixin",
 		"BlockStateBaseMixin",
+		"BlockDisplayMixin",
 		"entity.EntityMixin",
 		"entity.ExplosionMixin"
 	],
