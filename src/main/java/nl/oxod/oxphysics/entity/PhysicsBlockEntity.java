@@ -28,6 +28,8 @@ public class PhysicsBlockEntity extends Entity implements EntityPhysicsElement {
   @Nullable
   private Display.BlockDisplay blockDisplay;
 
+  private double prevX, prevY, prevZ;
+
   public PhysicsBlockEntity(EntityType<PhysicsBlockEntity> entityType, Level level) {
     super(entityType, level);
   }
@@ -35,6 +37,9 @@ public class PhysicsBlockEntity extends Entity implements EntityPhysicsElement {
   public PhysicsBlockEntity(Level level, BlockPos pos, BlockState blockState) {
     this(OxPhysicsEntities.PHYSICS_BLOCK, level);
     this.setPos(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+    this.prevX = this.getX();
+    this.prevY = this.getY();
+    this.prevZ = this.getZ();
     this.entityData.set(DATA_BLOCK_STATE, blockState);
     this.rigidBody = new EntityRigidBody(this);
   }
@@ -71,8 +76,18 @@ public class PhysicsBlockEntity extends Entity implements EntityPhysicsElement {
 
   @Override
   public void tick() {
+    this.prevX = this.getX();
+    this.prevY = this.getY();
+    this.prevZ = this.getZ();
     super.tick();
+
     if (this.blockDisplay != null && !this.isRemoved()) {
+      double dx = this.getX() - this.prevX;
+      double dy = this.getY() - this.prevY;
+      double dz = this.getZ() - this.prevZ;
+      if (dx * dx + dy * dy + dz * dz > 1e-6) {
+        this.blockDisplay.setDeltaMovement(dx, dy, dz);
+      }
       this.blockDisplay.setPos(this.getX() - 0.5, this.getY() - 0.5, this.getZ() - 0.5);
     }
   }

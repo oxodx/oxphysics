@@ -1,6 +1,5 @@
 package nl.oxod.oxphysics.command;
 
-import com.jme3.math.Vector3f;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.commands.CommandBuildContext;
@@ -14,8 +13,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.level.block.state.BlockState;
 import nl.oxod.oxphysics.bullet.collision.space.MinecraftSpace;
-import nl.oxod.oxphysics.bullet.math.Convert;
 import nl.oxod.oxphysics.entity.PhysicsBlockEntity;
+import nl.oxod.oxphysics.mixin.DisplayAccessor;
 
 public final class OxPhysicsCommands {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context,
@@ -43,7 +42,11 @@ public final class OxPhysicsCommands {
     level.addFreshEntity(physicsEntity);
 
     var display = new Display.BlockDisplay(net.minecraft.world.entity.EntityTypes.BLOCK_DISPLAY, level);
-    display.setPos(pos.getX(), pos.getY(), pos.getZ());
+    display.setPos(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+
+    var accessor = (DisplayAccessor) (Object) display;
+    display.getEntityData().set(accessor.getDataPosRotInterpolationDurationId(), 1);
+
     physicsEntity.setBlockDisplay(display);
     level.addFreshEntity(display);
 
