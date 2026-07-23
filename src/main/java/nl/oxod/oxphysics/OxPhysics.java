@@ -1,7 +1,8 @@
 package nl.oxod.oxphysics;
 
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.resources.Identifier;
+import nl.oxod.oxphysics.bullet.natives.NativeLoader;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +15,6 @@ public class OxPhysics implements ModInitializer {
 		// prevent annoying libbulletjme spam
 		java.util.logging.LogManager.getLogManager().reset();
 
-		LOGGER.info("Hello Fabric world!");
+		NativeLoader.load();
 	}
 }
