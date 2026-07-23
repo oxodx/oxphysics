@@ -1,7 +1,9 @@
 package nl.oxod.oxphysics;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import nl.oxod.oxphysics.bullet.natives.NativeLoader;
+import nl.oxod.oxphysics.command.OxPhysicsCommand;
 import nl.oxod.oxphysics.event.ServerEventHandler;
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
@@ -18,6 +20,10 @@ public class OxPhysics implements ModInitializer {
 	public void onInitialize() {
 		// prevent annoying libbulletjme spam
 		java.util.logging.LogManager.getLogManager().reset();
+
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+			OxPhysicsCommand.register(dispatcher, registryAccess);
+		});
 
 		NativeLoader.load();
 		ServerEventHandler.register();

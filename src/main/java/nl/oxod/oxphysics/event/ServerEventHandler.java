@@ -18,7 +18,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import nl.oxod.oxphysics.command.OxPhysicsCommands;
 import nl.oxod.oxphysics.api.BlockDisplayPhysicsAccessor;
 import nl.oxod.oxphysics.api.EntityPhysicsElement;
 import nl.oxod.oxphysics.api.event.ServerEvents;
@@ -47,9 +46,6 @@ public final class ServerEventHandler {
     PhysicsSpaceEvents.STEP.register(PressureGenerator::step);
     PhysicsSpaceEvents.STEP.register(TerrainGenerator::step);
     PhysicsSpaceEvents.ELEMENT_ADDED.register(ServerEventHandler::onElementAddedToSpace);
-
-    // Commands
-    CommandRegistrationCallback.EVENT.register(OxPhysicsCommands::register);
 
     // Server Events
     ServerLifecycleEvents.SERVER_STARTING.register(ServerEventHandler::onServerStart);
