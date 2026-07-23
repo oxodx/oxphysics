@@ -34,7 +34,8 @@ public final class OxPhysicsCommands {
 
                         spawnPhysicsBlock(level, pos, blockState);
                         ctx.getSource().sendSuccess(
-                            () -> Component.literal("Spawned physics block at " + pos.getX() + " " + pos.getY() + " " + pos.getZ()),
+                            () -> Component.literal(
+                                "Spawned physics block at " + pos.getX() + " " + pos.getY() + " " + pos.getZ()),
                             true);
                         return 1;
                       } catch (Exception e) {
