@@ -64,6 +64,7 @@ public final class OxPhysicsCommands {
     var rigidBody = new EntityRigidBody((EntityPhysicsElement) display, space, shape);
 
     var physicsAccessor = (BlockDisplayPhysicsAccessor) (Object) display;
+    physicsAccessor.physics$setActive(true);
     physicsAccessor.physics$setRigidBody(rigidBody);
 
     var blockAccessor = (BlockDisplayMixin) (Object) display;

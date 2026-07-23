@@ -105,6 +105,10 @@ public final class ServerEventHandler {
   }
 
   public static void onEntityLoad(Entity entity, Level world) {
+    if (entity instanceof BlockDisplayPhysicsAccessor accessor && accessor.physics$isActive()
+        && !EntityPhysicsElement.is(entity)) {
+      setupPhysicsForBlockDisplay(entity);
+    }
     if (EntityPhysicsElement.is(entity) && !PlayerLookup.tracking(entity).isEmpty()) {
       var space = MinecraftSpace.get(entity.level());
       space.getWorkerThread().execute(() -> space.addCollisionObject(EntityPhysicsElement.get(entity).getRigidBody()));
@@ -112,10 +116,34 @@ public final class ServerEventHandler {
   }
 
   public static void onStartTrackingEntity(Entity entity, ServerPlayer player) {
+    if (entity instanceof BlockDisplayPhysicsAccessor accessor && accessor.physics$isActive()
+        && !EntityPhysicsElement.is(entity)) {
+      setupPhysicsForBlockDisplay(entity);
+    }
     if (EntityPhysicsElement.is(entity)) {
       var space = MinecraftSpace.get(entity.level());
       space.getWorkerThread().execute(() -> space.addCollisionObject(EntityPhysicsElement.get(entity).getRigidBody()));
     }
+  }
+
+  private static void setupPhysicsForBlockDisplay(Entity entity) {
+    var accessor = (BlockDisplayPhysicsAccessor) entity;
+    var display = (net.minecraft.world.entity.Display.BlockDisplay) entity;
+    var blockAccessor = (nl.oxod.oxphysics.mixin.BlockDisplayMixin) (Object) display;
+    var blockState = display.getEntityData().get(blockAccessor.getDataBlockStateId());
+
+    var collisionShape = blockState.getCollisionShape(entity.level(), entity.blockPosition());
+    nl.oxod.oxphysics.bullet.collision.body.shape.MinecraftShape.Convex shape;
+    if (collisionShape.isEmpty()) {
+      shape = nl.oxod.oxphysics.bullet.collision.body.shape.MinecraftShape.convex(display.getBoundingBox());
+    } else {
+      shape = nl.oxod.oxphysics.bullet.collision.body.shape.MinecraftShape.convex(collisionShape);
+    }
+
+    var space = MinecraftSpace.get(entity.level());
+    var rigidBody = new nl.oxod.oxphysics.bullet.collision.body.EntityRigidBody(
+        (EntityPhysicsElement) entity, space, shape);
+    accessor.physics$setRigidBody(rigidBody);
   }
 
   public static void onStopTrackingEntity(Entity entity, ServerPlayer player) {
