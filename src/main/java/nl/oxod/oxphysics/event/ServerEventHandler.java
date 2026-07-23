@@ -1,5 +1,7 @@
 package nl.oxod.oxphysics.event;
 
+import com.jme3.bounding.BoundingBox;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -17,6 +19,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import nl.oxod.oxphysics.command.OxPhysicsCommands;
+import nl.oxod.oxphysics.api.BlockDisplayPhysicsAccessor;
 import nl.oxod.oxphysics.api.EntityPhysicsElement;
 import nl.oxod.oxphysics.api.event.ServerEvents;
 import nl.oxod.oxphysics.api.event.collision.PhysicsSpaceEvents;
@@ -128,9 +131,14 @@ public final class ServerEventHandler {
     EntityCollisionGenerator.step(space);
 
     for (var rigidBody : space.getRigidBodiesByClass(EntityRigidBody.class)) {
-      /* Set entity position */
       var location = rigidBody.getFrame().getLocation(new Vector3f(), 1.0f);
-      rigidBody.getElement().cast().absSnapTo(location.x, location.y, location.z);
+      var element = rigidBody.getElement().cast();
+      if (element instanceof BlockDisplayPhysicsAccessor) {
+        var bb = rigidBody.getCollisionShape().boundingBox(new Vector3f(), new Quaternion(), new BoundingBox());
+        element.absSnapTo(location.x, location.y - bb.getYExtent(), location.z);
+      } else {
+        element.absSnapTo(location.x, location.y, location.z);
+      }
     }
   }
 }
