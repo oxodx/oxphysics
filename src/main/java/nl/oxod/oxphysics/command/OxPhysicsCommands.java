@@ -16,7 +16,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import nl.oxod.oxphysics.api.BlockDisplayPhysicsAccessor;
 import nl.oxod.oxphysics.api.EntityPhysicsElement;
 import nl.oxod.oxphysics.bullet.collision.body.EntityRigidBody;
+import nl.oxod.oxphysics.bullet.collision.body.shape.MinecraftShape;
+import nl.oxod.oxphysics.bullet.collision.space.MinecraftSpace;
 import nl.oxod.oxphysics.mixin.BlockDisplayMixin;
+import nl.oxod.oxphysics.mixin.DisplayAccessor;
 
 public final class OxPhysicsCommands {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context,
@@ -49,14 +52,25 @@ public final class OxPhysicsCommands {
     var display = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
     display.setPos(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
 
-    var physicsAccessor = (BlockDisplayPhysicsAccessor) (Object) display;
-    physicsAccessor.physics$setBlockState(blockState);
+    var collisionShape = blockState.getCollisionShape(level, pos);
+    MinecraftShape.Convex shape;
+    if (collisionShape.isEmpty()) {
+      shape = MinecraftShape.convex(display.getBoundingBox());
+    } else {
+      shape = MinecraftShape.convex(collisionShape);
+    }
 
-    var rigidBody = new EntityRigidBody((EntityPhysicsElement) display);
+    var space = MinecraftSpace.get(level);
+    var rigidBody = new EntityRigidBody((EntityPhysicsElement) display, space, shape);
+
+    var physicsAccessor = (BlockDisplayPhysicsAccessor) (Object) display;
     physicsAccessor.physics$setRigidBody(rigidBody);
 
     var blockAccessor = (BlockDisplayMixin) (Object) display;
     display.getEntityData().set(blockAccessor.getDataBlockStateId(), blockState);
+
+    var displayAccessor = (DisplayAccessor) (Object) display;
+    display.getEntityData().set(displayAccessor.getDataPosRotInterpolationDurationId(), 1);
 
     level.addFreshEntity(display);
   }
