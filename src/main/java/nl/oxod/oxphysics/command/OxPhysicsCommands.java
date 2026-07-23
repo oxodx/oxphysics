@@ -11,10 +11,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.block.state.BlockState;
-import nl.oxod.oxphysics.bullet.collision.space.MinecraftSpace;
-import nl.oxod.oxphysics.entity.PhysicsBlockEntity;
-import nl.oxod.oxphysics.mixin.DisplayAccessor;
+import nl.oxod.oxphysics.bullet.collision.body.EntityRigidBody;
+import nl.oxod.oxphysics.mixin.BlockDisplayMixin;
+import nl.oxod.oxphysics.mixin.BlockDisplayPhysicsMixin;
 
 public final class OxPhysicsCommands {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context,
@@ -38,21 +39,18 @@ public final class OxPhysicsCommands {
   }
 
   private static void spawnPhysicsBlock(ServerLevel level, BlockPos pos, BlockState blockState) {
-    var physicsEntity = new PhysicsBlockEntity(level, pos, blockState);
-    level.addFreshEntity(physicsEntity);
-
-    var display = new Display.BlockDisplay(net.minecraft.world.entity.EntityTypes.BLOCK_DISPLAY, level);
+    var display = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
     display.setPos(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
 
-    var accessor = (DisplayAccessor) (Object) display;
-    display.getEntityData().set(accessor.getDataPosRotInterpolationDurationId(), 1);
+    var physicsMixin = (BlockDisplayPhysicsMixin) (Object) display;
+    physicsMixin.physics$setBlockState(blockState);
 
-    physicsEntity.setBlockDisplay(display);
+    var rigidBody = new EntityRigidBody(physicsMixin);
+    physicsMixin.physics$setRigidBody(rigidBody);
+
+    var blockAccessor = (BlockDisplayMixin) (Object) display;
+    display.getEntityData().set(blockAccessor.getDataBlockStateId(), blockState);
+
     level.addFreshEntity(display);
-
-    var space = MinecraftSpace.get(level);
-    space.getWorkerThread().execute(() -> {
-      space.addCollisionObject(physicsEntity.getRigidBody());
-    });
   }
 }

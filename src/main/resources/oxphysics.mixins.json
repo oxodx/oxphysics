@@ -6,7 +6,7 @@
 		"LevelMixin",
 		"BlockStateBaseMixin",
 		"BlockDisplayMixin",
-		"DisplayAccessor",
+		"BlockDisplayPhysicsMixin",
 		"entity.EntityMixin",
 		"entity.ExplosionMixin"
 	],
