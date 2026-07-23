@@ -60,8 +60,12 @@ public final class OxPhysicsCommands {
       shape = MinecraftShape.convex(collisionShape);
     }
 
+    shape.setMargin(1E-4f);
+
     var space = MinecraftSpace.get(level);
     var rigidBody = new EntityRigidBody((EntityPhysicsElement) display, space, shape);
+    rigidBody.setCcdMotionThreshold(0.5f);
+    rigidBody.setCcdSweptSphereRadius(0.4f);
 
     var physicsAccessor = (BlockDisplayPhysicsAccessor) (Object) display;
     physicsAccessor.physics$setActive(true);

@@ -139,10 +139,13 @@ public final class ServerEventHandler {
     } else {
       shape = nl.oxod.oxphysics.bullet.collision.body.shape.MinecraftShape.convex(collisionShape);
     }
+    shape.setMargin(1E-4f);
 
     var space = MinecraftSpace.get(entity.level());
     var rigidBody = new nl.oxod.oxphysics.bullet.collision.body.EntityRigidBody(
         (EntityPhysicsElement) entity, space, shape);
+    rigidBody.setCcdMotionThreshold(0.5f);
+    rigidBody.setCcdSweptSphereRadius(0.4f);
     accessor.physics$setRigidBody(rigidBody);
   }
 
@@ -160,10 +163,13 @@ public final class ServerEventHandler {
 
     for (var rigidBody : space.getRigidBodiesByClass(EntityRigidBody.class)) {
       var location = rigidBody.getFrame().getLocation(new Vector3f(), 1.0f);
+      var rotation = rigidBody.getFrame().getRotation(new Quaternion(), 1.0f);
       var element = rigidBody.getElement().cast();
-      if (element instanceof BlockDisplayPhysicsAccessor) {
+      if (element instanceof net.minecraft.world.entity.Display display) {
         var bb = rigidBody.getCollisionShape().boundingBox(new Vector3f(), new Quaternion(), new BoundingBox());
         element.absSnapTo(location.x, location.y - bb.getYExtent(), location.z);
+        var displayAccessor = (nl.oxod.oxphysics.mixin.DisplayAccessor) (Object) display;
+        display.getEntityData().set(displayAccessor.getDataLeftRotationId(), Convert.toMinecraft(rotation));
       } else {
         element.absSnapTo(location.x, location.y, location.z);
       }
