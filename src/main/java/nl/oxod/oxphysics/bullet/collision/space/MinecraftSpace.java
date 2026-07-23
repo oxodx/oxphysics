@@ -131,14 +131,14 @@ public class MinecraftSpace extends PhysicsSpace implements PhysicsCollisionList
       for (int i = 0; i < 3; ++i) {
         // Hop threads...
         this.futures[i] = CompletableFuture.runAsync(() -> {
-          /* Call collision events */
-          // this.distributeEvents();
-
           /* World Step Event */
           PhysicsSpaceEvents.STEP.invoker().onStep(this);
 
           /* Step the Simulation */
           this.update(1 / 60f);
+
+          /* Post Step Event - for position correction */
+          PhysicsSpaceEvents.POST_STEP.invoker().onPostStep(this);
         }, getWorkerThread());
       }
 

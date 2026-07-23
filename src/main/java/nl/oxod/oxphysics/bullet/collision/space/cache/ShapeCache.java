@@ -32,6 +32,12 @@ public final class ShapeCache {
   private static MinecraftShape createShapeFor(BlockState blockState, Level level, BlockPos blockPos) {
     final var voxelShape = blockState.getCollisionShape(level, blockPos);
     if (!voxelShape.isEmpty()) {
+      var aabb = voxelShape.bounds();
+      boolean isFullCube = Math.abs(aabb.minX) < 1E-5 && Math.abs(aabb.minY) < 1E-5 && Math.abs(aabb.minZ) < 1E-5
+          && Math.abs(aabb.maxX - 1.0) < 1E-5 && Math.abs(aabb.maxY - 1.0) < 1E-5 && Math.abs(aabb.maxZ - 1.0) < 1E-5;
+      if (isFullCube) {
+        return MinecraftShape.box(aabb);
+      }
       return MinecraftShape.convex(voxelShape);
     } else {
       return FALLBACK_SHAPE;

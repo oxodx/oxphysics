@@ -30,6 +30,9 @@ public class TerrainRigidBody extends MinecraftRigidBody {
     this.setFriction(friction);
     this.setRestitution(restitution);
     this.setPhysicsLocation(new Vector3f(blockPos.getX() + 0.5f, blockPos.getY() + 0.5f, blockPos.getZ() + 0.5f));
+    this.setCcdMotionThreshold(0.01f);
+    this.setCcdSweptSphereRadius(0.4f);
+    this.setContactProcessingThreshold(0.0f);
   }
 
   public BlockPos getBlockPos() {

@@ -16,6 +16,11 @@ public final class PhysicsSpaceEvents {
       e.onStep(space);
     }
   });
+  public static final Event<PostStep> POST_STEP = EventFactory.createArrayBacked(PostStep.class, (events) -> (space) -> {
+    for (var e : events) {
+      e.onPostStep(space);
+    }
+  });
   public static final Event<ElementAdded> ELEMENT_ADDED = EventFactory.createArrayBacked(ElementAdded.class,
       (events) -> (space, body) -> {
         for (var e : events) {
@@ -53,25 +58,23 @@ public final class PhysicsSpaceEvents {
   }
 
   @FunctionalInterface
-  public interface ElementAdded {
+  public interface PostStep {
     /**
-     * Invoked each time a new {@link ElementRigidBody} is added to the environment.
+     * Invoked after each time the {@link MinecraftSpace} is stepped.
+     * Use for position correction, corner collision checks, etc.
      * 
-     * @param space     the minecraft space
-     * @param rigidBody the element rigid body being added
+     * @param space the minecraft space
      */
+    void onPostStep(MinecraftSpace space);
+  }
+
+  @FunctionalInterface
+  public interface ElementAdded {
     void onElementAdded(MinecraftSpace space, ElementRigidBody rigidBody);
   }
 
   @FunctionalInterface
   public interface ElementRemoved {
-    /**
-     * Invoked each time an {@link ElementRigidBody} is removed from the
-     * environment.
-     * 
-     * @param space     the minecraft space
-     * @param rigidBody the element rigid body being removed
-     */
     void onElementRemoved(MinecraftSpace space, ElementRigidBody rigidBody);
   }
 }

@@ -22,6 +22,12 @@ public interface MinecraftShape {
 
   float getVolume();
 
+  default void setMargin(float margin) {
+    if (this instanceof com.jme3.bullet.collision.shapes.CollisionShape shape) {
+      shape.setMargin(margin);
+    }
+  }
+
   static Box box(AABB box) {
     return MinecraftShape.box(Convert.toBullet(box));
   }

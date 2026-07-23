@@ -50,12 +50,19 @@ public final class OxPhysicsCommands {
 
   private static void spawnPhysicsBlock(ServerLevel level, BlockPos pos, BlockState blockState) {
     var display = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
-    display.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+    display.setPos(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
 
-    var collisionShape = blockState.getCollisionShape(level, pos);
-    MinecraftShape.Convex shape;
+var collisionShape = blockState.getCollisionShape(level, pos);
+    MinecraftShape shape;
+    var aabb = collisionShape.bounds();
+    boolean isFullCube = !collisionShape.isEmpty()
+        && Math.abs(aabb.minX) < 1E-5 && Math.abs(aabb.minY) < 1E-5 && Math.abs(aabb.minZ) < 1E-5
+        && Math.abs(aabb.maxX - 1.0) < 1E-5 && Math.abs(aabb.maxY - 1.0) < 1E-5 && Math.abs(aabb.maxZ - 1.0) < 1E-5;
+    
     if (collisionShape.isEmpty()) {
       shape = MinecraftShape.convex(display.getBoundingBox());
+    } else if (isFullCube) {
+      shape = MinecraftShape.box(aabb);
     } else {
       shape = MinecraftShape.convex(collisionShape);
     }
@@ -64,8 +71,9 @@ public final class OxPhysicsCommands {
 
     var space = MinecraftSpace.get(level);
     var rigidBody = new EntityRigidBody((EntityPhysicsElement) display, space, shape);
-    rigidBody.setCcdMotionThreshold(0.5f);
+    rigidBody.setCcdMotionThreshold(0.01f);
     rigidBody.setCcdSweptSphereRadius(0.4f);
+    rigidBody.setContactProcessingThreshold(0.0f);
 
     var physicsAccessor = (BlockDisplayPhysicsAccessor) (Object) display;
     physicsAccessor.physics$setActive(true);

@@ -133,9 +133,16 @@ public final class ServerEventHandler {
     var blockState = display.getEntityData().get(blockAccessor.getDataBlockStateId());
 
     var collisionShape = blockState.getCollisionShape(entity.level(), entity.blockPosition());
-    nl.oxod.oxphysics.bullet.collision.body.shape.MinecraftShape.Convex shape;
+    nl.oxod.oxphysics.bullet.collision.body.shape.MinecraftShape shape;
+    var aabb = collisionShape.bounds();
+    boolean isFullCube = !collisionShape.isEmpty()
+        && Math.abs(aabb.minX) < 1E-5 && Math.abs(aabb.minY) < 1E-5 && Math.abs(aabb.minZ) < 1E-5
+        && Math.abs(aabb.maxX - 1.0) < 1E-5 && Math.abs(aabb.maxY - 1.0) < 1E-5 && Math.abs(aabb.maxZ - 1.0) < 1E-5;
+
     if (collisionShape.isEmpty()) {
       shape = nl.oxod.oxphysics.bullet.collision.body.shape.MinecraftShape.convex(display.getBoundingBox());
+    } else if (isFullCube) {
+      shape = nl.oxod.oxphysics.bullet.collision.body.shape.MinecraftShape.box(aabb);
     } else {
       shape = nl.oxod.oxphysics.bullet.collision.body.shape.MinecraftShape.convex(collisionShape);
     }
@@ -144,8 +151,9 @@ public final class ServerEventHandler {
     var space = MinecraftSpace.get(entity.level());
     var rigidBody = new nl.oxod.oxphysics.bullet.collision.body.EntityRigidBody(
         (EntityPhysicsElement) entity, space, shape);
-    rigidBody.setCcdMotionThreshold(0.5f);
+    rigidBody.setCcdMotionThreshold(0.01f);
     rigidBody.setCcdSweptSphereRadius(0.4f);
+    rigidBody.setContactProcessingThreshold(0.0f);
     accessor.physics$setRigidBody(rigidBody);
   }
 
@@ -166,8 +174,8 @@ public final class ServerEventHandler {
       var rotation = rigidBody.getFrame().getRotation(new Quaternion(), 1.0f);
       var element = rigidBody.getElement().cast();
       if (element instanceof net.minecraft.world.entity.Display display) {
-        var bb = rigidBody.getCollisionShape().boundingBox(new Vector3f(), new Quaternion(), new BoundingBox());
-        element.absSnapTo(location.x, location.y - bb.getYExtent(), location.z);
+        var bb = rigidBody.getCollisionShape().boundingBox(new Vector3f(), rotation, new BoundingBox());
+        element.absSnapTo(location.x, location.y, location.z);
         var displayAccessor = (nl.oxod.oxphysics.mixin.DisplayAccessor) (Object) display;
         display.getEntityData().set(displayAccessor.getDataLeftRotationId(), Convert.toMinecraft(rotation));
       } else {
