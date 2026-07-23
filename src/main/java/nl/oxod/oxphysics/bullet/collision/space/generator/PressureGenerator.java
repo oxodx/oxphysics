@@ -2,7 +2,7 @@ package nl.oxod.oxphysics.bullet.collision.space.generator;
 
 import com.jme3.bounding.BoundingBox;
 import com.jme3.math.Quaternion;
-import com.jme3.math.Triangle;
+import nl.oxod.oxphysics.bullet.collision.body.shape.Triangle;
 import com.jme3.math.Vector3f;
 import java.util.ArrayList;
 import java.util.HashMap;
