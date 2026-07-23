@@ -1,0 +1,31 @@
+{
+	"schemaVersion": 1,
+	"id": "oxphysics",
+	"version": "${version}",
+	"name": "OxPhysics",
+	"description": "This is a physics library",
+	"authors": [
+		"oxod"
+	],
+	"contact": {
+		"homepage": "https://github.com/oxodx/oxphysics.git",
+		"sources": "https://github.com/oxodx/oxphysics.git"
+	},
+	"license": "MIT",
+	"icon": "assets/oxphysics/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"nl.oxod.oxphysics.OxPhysics"
+		]
+	},
+	"mixins": [
+		"oxphysics.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
