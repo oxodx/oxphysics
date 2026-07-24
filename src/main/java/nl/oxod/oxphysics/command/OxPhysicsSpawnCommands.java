@@ -31,6 +31,7 @@ import nl.oxod.oxphysics.mixin.DisplayAccessor;
 
 public class OxPhysicsSpawnCommands {
   private static final BlockState DEFAULT_SPAWN_BLOCKSTATE = Blocks.STONE.defaultBlockState();
+  private static final int DISPLAY_INTERPOLATION_TICKS = 3;
 
   public static void register(final LiteralArgumentBuilder<CommandSourceStack> oxPhysicsBuilder,
       final CommandBuildContext buildContext) {
@@ -81,7 +82,11 @@ public class OxPhysicsSpawnCommands {
     var displayAccessor = (DisplayAccessor) (Object) display;
 
     display.getEntityData().set(blockAccessor.getDataBlockStateId(), blockState);
-    display.getEntityData().set(displayAccessor.getDataPosRotInterpolationDurationId(), 1);
+    // Physics is synchronized once per server tick. Blend a few ticks of
+    // updates so clients see continuous movement instead of 20 Hz snapping.
+    display.getEntityData().set(displayAccessor.getDataPosRotInterpolationDurationId(), DISPLAY_INTERPOLATION_TICKS);
+    display.getEntityData().set(displayAccessor.getDataTransformationInterpolationDurationId(),
+        DISPLAY_INTERPOLATION_TICKS);
 
     BlockPos blockPos = BlockPos.containing(targetX, targetY, targetZ);
     var collisionShape = blockState.getCollisionShape(level, blockPos);

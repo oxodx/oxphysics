@@ -12,6 +12,9 @@ public interface DisplayAccessor {
   @Accessor("DATA_POS_ROT_INTERPOLATION_DURATION_ID")
   EntityDataAccessor<Integer> getDataPosRotInterpolationDurationId();
 
+  @Accessor("DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID")
+  EntityDataAccessor<Integer> getDataTransformationInterpolationDurationId();
+
   @Accessor("DATA_LEFT_ROTATION_ID")
   EntityDataAccessor<Quaternionfc> getDataLeftRotationId();
 }
