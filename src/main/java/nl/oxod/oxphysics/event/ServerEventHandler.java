@@ -16,10 +16,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import nl.oxod.oxphysics.api.BlockDisplayPhysicsAccessor;
 import nl.oxod.oxphysics.api.EntityPhysicsElement;
+import nl.oxod.oxphysics.api.PhysicsInteractionAccessor;
 import nl.oxod.oxphysics.api.event.ServerEvents;
 import nl.oxod.oxphysics.api.event.collision.PhysicsSpaceEvents;
 import nl.oxod.oxphysics.bullet.collision.body.ElementRigidBody;
@@ -33,6 +36,7 @@ import nl.oxod.oxphysics.bullet.collision.space.supplier.entity.ServerEntitySupp
 import nl.oxod.oxphysics.bullet.collision.space.supplier.level.ServerLevelSupplier;
 import nl.oxod.oxphysics.bullet.math.Convert;
 import nl.oxod.oxphysics.bullet.thread.PhysicsThread;
+import nl.oxod.oxphysics.mixin.InteractionAccessor;
 
 public final class ServerEventHandler {
   private static final Vector3f BLOCK_DISPLAY_CENTER_OFFSET = new Vector3f(0.5f, 0.5f, 0.5f);
@@ -188,9 +192,23 @@ public final class ServerEventHandler {
             location.z - offset.z);
         var displayAccessor = (nl.oxod.oxphysics.mixin.DisplayAccessor) (Object) display;
         display.getEntityData().set(displayAccessor.getDataLeftRotationId(), Convert.toMinecraft(rotation));
+        var physicsAccessor = (BlockDisplayPhysicsAccessor) (Object) display;
+        updateInteraction(physicsAccessor.physics$getInteractionEntity(), rigidBody.getCurrentMinecraftBoundingBox());
       } else {
         element.absSnapTo(location.x, location.y, location.z);
       }
     }
+  }
+
+  private static void updateInteraction(Interaction interaction, AABB bounds) {
+    if (interaction == null || interaction.isRemoved()) {
+      return;
+    }
+
+    var interactionAccessor = (InteractionAccessor) (Object) interaction;
+    interaction.getEntityData().set(interactionAccessor.getDataWidthId(),
+        (float) Math.max(bounds.getXsize(), bounds.getZsize()));
+    interaction.getEntityData().set(interactionAccessor.getDataHeightId(), (float) bounds.getYsize());
+    interaction.absSnapTo(bounds.getCenter().x, bounds.minY, bounds.getCenter().z);
   }
 }

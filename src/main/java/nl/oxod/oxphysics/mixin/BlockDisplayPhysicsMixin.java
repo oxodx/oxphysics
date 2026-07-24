@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -28,6 +29,10 @@ public abstract class BlockDisplayPhysicsMixin extends Entity implements EntityP
   private EntityRigidBody physics$rigidBody;
 
   @Unique
+  @Nullable
+  private Interaction physics$interactionEntity;
+
+  @Unique
   private boolean physics$active;
 
   @Override
@@ -38,6 +43,17 @@ public abstract class BlockDisplayPhysicsMixin extends Entity implements EntityP
 
   public void physics$setRigidBody(@Nullable EntityRigidBody rigidBody) {
     this.physics$rigidBody = rigidBody;
+  }
+
+  @Override
+  @Nullable
+  public Interaction physics$getInteractionEntity() {
+    return this.physics$interactionEntity;
+  }
+
+  @Override
+  public void physics$setInteractionEntity(@Nullable Interaction interaction) {
+    this.physics$interactionEntity = interaction;
   }
 
   @Override

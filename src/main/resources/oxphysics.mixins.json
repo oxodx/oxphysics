@@ -8,7 +8,10 @@
 		"BlockDisplayMixin",
 		"BlockDisplayPhysicsMixin",
 		"DisplayAccessor",
+		"InteractionAccessor",
+		"InteractionPhysicsMixin",
 		"entity.EntityMixin",
+		"entity.PlayerPhysicsMixin",
 		"entity.ExplosionMixin"
 	],
 	"injectors": {

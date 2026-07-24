@@ -16,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,11 +24,13 @@ import net.minecraft.world.phys.Vec3;
 import nl.oxod.oxphysics.OxPhysics;
 import nl.oxod.oxphysics.api.BlockDisplayPhysicsAccessor;
 import nl.oxod.oxphysics.api.EntityPhysicsElement;
+import nl.oxod.oxphysics.api.PhysicsInteractionAccessor;
 import nl.oxod.oxphysics.bullet.collision.body.EntityRigidBody;
 import nl.oxod.oxphysics.bullet.collision.body.shape.MinecraftShape;
 import nl.oxod.oxphysics.bullet.collision.space.MinecraftSpace;
 import nl.oxod.oxphysics.mixin.BlockDisplayMixin;
 import nl.oxod.oxphysics.mixin.DisplayAccessor;
+import nl.oxod.oxphysics.mixin.InteractionAccessor;
 
 public class OxPhysicsSpawnCommands {
   private static final BlockState DEFAULT_SPAWN_BLOCKSTATE = Blocks.STONE.defaultBlockState();
@@ -125,6 +128,21 @@ public class OxPhysicsSpawnCommands {
     }
 
     if (!level.addFreshEntity(display)) {
+      return false;
+    }
+
+    // Interaction entities are vanilla, client-visible hitboxes. They let a
+    // server-only installation receive normal player attack packets.
+    var interaction = new Interaction(EntityTypes.INTERACTION, level);
+    var interactionAccessor = (InteractionAccessor) (Object) interaction;
+    interaction.getEntityData().set(interactionAccessor.getDataWidthId(), 1.0f);
+    interaction.getEntityData().set(interactionAccessor.getDataHeightId(), 1.0f);
+    interaction.setPos(targetX + 0.5, targetY, targetZ + 0.5);
+    ((PhysicsInteractionAccessor) interaction).physics$setRigidBody(rigidBody);
+    physicsAccessor.physics$setInteractionEntity(interaction);
+
+    if (!level.addFreshEntity(interaction)) {
+      display.discard();
       return false;
     }
 
