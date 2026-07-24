@@ -1,6 +1,7 @@
 package nl.oxod.oxphysics.bullet.collision.space.generator;
 
-import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 import net.minecraft.core.BlockPos;
 import nl.oxod.oxphysics.bullet.collision.body.ElementRigidBody;
@@ -16,7 +17,7 @@ import nl.oxod.oxphysics.bullet.collision.space.MinecraftSpace;
 public class TerrainGenerator {
   public static void step(MinecraftSpace space) {
     final var chunkCache = space.getChunkCache();
-    final var keep = new HashSet<TerrainRigidBody>();
+    final Map<TerrainRigidBody, Boolean> keep = new IdentityHashMap<>();
 
     for (var rigidBody : space.getRigidBodiesByClass(ElementRigidBody.class)) {
       if (!rigidBody.terrainLoadingEnabled() || !rigidBody.isActive()) {
@@ -33,21 +34,21 @@ public class TerrainGenerator {
 
               final var terrain2 = TerrainRigidBody.from(blockData);
               space.addCollisionObject(terrain2);
-              keep.add(terrain2);
+              keep.put(terrain2, Boolean.TRUE);
             } else {
-              keep.add(terrain);
+              keep.put(terrain, Boolean.TRUE);
             }
           }, () -> {
             final var terrain = TerrainRigidBody.from(blockData);
             space.addCollisionObject(terrain);
-            keep.add(terrain);
+            keep.put(terrain, Boolean.TRUE);
           });
         });
       });
     }
 
     space.getTerrainMap().forEach((blockPos, terrain) -> {
-      if (!keep.contains(terrain)) {
+      if (!keep.containsKey(terrain)) {
         space.removeTerrainObjectAt(blockPos);
       }
     });

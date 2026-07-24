@@ -207,7 +207,7 @@ public class MinecraftSpace extends PhysicsSpace implements PhysicsCollisionList
   }
 
   public Map<BlockPos, TerrainRigidBody> getTerrainMap() {
-    return new HashMap<>(this.terrainMap);
+    return this.terrainMap;
   }
 
   public Optional<TerrainRigidBody> getTerrainObjectAt(BlockPos blockPos) {

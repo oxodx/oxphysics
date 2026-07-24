@@ -3,6 +3,7 @@ package nl.oxod.oxphysics.bullet.thread;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.locks.LockSupport;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -30,6 +31,7 @@ import nl.oxod.oxphysics.bullet.collision.space.supplier.entity.EntitySupplier;
  */
 public class PhysicsThread extends Thread implements Executor {
   private final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
+  private static final long IDLE_PARK_NANOS = 250_000L;
   private final Executor parentExecutor;
   private final Thread parentThread;
   private final LevelSupplier levelSupplier;
@@ -65,11 +67,15 @@ public class PhysicsThread extends Thread implements Executor {
   @Override
   public void run() {
     while (running) {
-      /* Run all queued tasks */
-      while (!tasks.isEmpty()) {
-        tasks.poll().run();
+      boolean didWork = false;
+      Runnable task;
+      while ((task = tasks.poll()) != null) {
+        didWork = true;
+        task.run();
       }
-      Thread.yield();
+      if (!didWork) {
+        LockSupport.parkNanos(IDLE_PARK_NANOS);
+      }
     }
   }
 
@@ -82,6 +88,7 @@ public class PhysicsThread extends Thread implements Executor {
   @Override
   public void execute(@NotNull Runnable task) {
     tasks.add(task);
+    LockSupport.unpark(this);
   }
 
   /**
@@ -129,6 +136,7 @@ public class PhysicsThread extends Thread implements Executor {
    */
   public void destroy() {
     this.running = false;
+    LockSupport.unpark(this);
     OxPhysics.LOGGER.info("Stopping " + getName());
 
     try {
