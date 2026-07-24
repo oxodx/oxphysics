@@ -35,6 +35,8 @@ import nl.oxod.oxphysics.bullet.math.Convert;
 import nl.oxod.oxphysics.bullet.thread.PhysicsThread;
 
 public final class ServerEventHandler {
+  private static final Vector3f BLOCK_DISPLAY_CENTER_OFFSET = new Vector3f(0.5f, 0.5f, 0.5f);
+
   private static PhysicsThread thread;
 
   public static PhysicsThread getThread() {
@@ -96,7 +98,15 @@ public final class ServerEventHandler {
   public static void onElementAddedToSpace(MinecraftSpace space, ElementRigidBody rigidBody) {
     if (rigidBody instanceof EntityRigidBody entityBody) {
       final var pos = entityBody.getElement().cast().position();
-      entityBody.setPhysicsLocation(Convert.toBullet(pos));
+      var location = Convert.toBullet(pos);
+
+      // A block display is rendered from its lower corner, while Bullet shapes
+      // are centred on their rigid body's location.
+      if (entityBody.getElement().cast() instanceof net.minecraft.world.entity.Display.BlockDisplay) {
+        location.add(BLOCK_DISPLAY_CENTER_OFFSET);
+      }
+
+      entityBody.setPhysicsLocation(location);
     }
   }
 
@@ -169,9 +179,11 @@ public final class ServerEventHandler {
       var location = rigidBody.getFrame().getLocation(new Vector3f(), 1.0f);
       var rotation = rigidBody.getFrame().getRotation(new Quaternion(), 1.0f);
       var element = rigidBody.getElement().cast();
-      if (element instanceof net.minecraft.world.entity.Display display) {
-        var bb = rigidBody.getCollisionShape().boundingBox(new Vector3f(), rotation, new BoundingBox());
-        element.absSnapTo(location.x, location.y, location.z);
+      if (element instanceof net.minecraft.world.entity.Display.BlockDisplay display) {
+        // Keep the display's lower corner aligned with the centre-based
+        // collision shape, including while the block is rotating.
+        var offset = rotation.toRotationMatrix().mult(BLOCK_DISPLAY_CENTER_OFFSET, new Vector3f());
+        element.absSnapTo(location.x - offset.x, location.y - offset.y, location.z - offset.z);
         var displayAccessor = (nl.oxod.oxphysics.mixin.DisplayAccessor) (Object) display;
         display.getEntityData().set(displayAccessor.getDataLeftRotationId(), Convert.toMinecraft(rotation));
       } else {
