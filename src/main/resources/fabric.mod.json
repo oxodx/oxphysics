@@ -3,7 +3,7 @@
 	"id": "oxphysics",
 	"version": "${version}",
 	"name": "OxPhysics",
-	"description": "This is a physics library",
+	"description": "A minecraft library to add physics to minecraft.",
 	"authors": [
 		"oxod"
 	],
