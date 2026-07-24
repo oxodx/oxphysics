@@ -4,7 +4,15 @@ plugins {
 	id("maven-publish")
 }
 
-version = "${project.mod_version}+${project.minecraft_version}"
+if (!hasProperty('ver')) {
+	version = "${getTime()}-SNAPSHOT".toUpperCase()
+} else {
+	def ver = property('ver').toString()
+	def formattedVer = ver.startsWith('v') ? ver.substring(1) : ver.replace('/', '-')
+	version = formattedVer.toUpperCase()
+}
+
+version = "${version}+${project.minecraft_version}"
 group = project.maven_group
 
 base {
@@ -108,7 +116,7 @@ modrinth {
 	token.set(System.getenv("MODRINTH") ?: "")
 	syncBodyFrom = rootProject.file("README.md").text
 	projectId = "oxphysics"
-	versionNumber.set(project.version.toString())
+	versionNumber.set(version)
 	versionType = "beta"
 	uploadFile = jar
 	gameVersions = ["26.2"]

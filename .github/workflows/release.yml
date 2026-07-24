@@ -37,7 +37,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
       - name: Build and Release
-        run: ./gradlew -Pver=${{ github.ref_name }} release modrinth
+        run: ./gradlew -Pver=${{ github.ref_name }} jar modrinth
         env:
           MODRINTH: ${{ secrets.MODRINTH }}
           CHANGELOG: ${{ github.event.release.body }}
