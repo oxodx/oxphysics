@@ -119,7 +119,14 @@ public class OxPhysicsSpawnCommands {
       display.setCustomNameVisible(false);
     }
 
-    return level.addFreshEntity(display);
+    if (!level.addFreshEntity(display)) {
+      return false;
+    }
+
+    // Do not wait for entity-tracking callbacks: a newly spawned block must
+    // enter the simulation even before any player begins tracking it.
+    space.getWorkerThread().execute(() -> space.addCollisionObject(rigidBody));
+    return true;
   }
 
   private static int spawnBlock(final CommandContext<CommandSourceStack> ctx,
