@@ -1,0 +1,61 @@
+name: Release
+
+permissions:
+  contents: read
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ format('{0}-{1}', github.workflow, github.ref) }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/cache@v6
+        with:  
+          path: |
+            ~/.gradle/loom-cache
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('**/*.gradle', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-
+      - uses: actions/checkout@v7
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distrobution: "microsoft"
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Build and Release
+        run: ./gradlew -Pver=${{ github.ref_name }} release modrinth
+        env:
+          MODRINTH: ${{ secrets.MODRINTH }}
+          CHANGELOG: ${{ github.event.release.body }}
+      - name: Upload build results
+        uses: actions/upload-artifact@v7
+        with:
+          name: Release Build
+          path: ${{ github.workspace }}/build/libs/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Create Release
+        uses: softprops/action-gh-release@v3
+        id: release
+        with:
+          files: ${{ github.workspace }}/build/libs/*
+          name: ${{ format('Release {0}', github.ref_name) }}
+          prerelease: ${{ contains(github.ref_name, '-RC-') }}
+          fail_on_unmatched_files: true
+          draft: true
+    outputs:
+      url: ${{ steps.release.outputs.url }}

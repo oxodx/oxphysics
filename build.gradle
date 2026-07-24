@@ -1,6 +1,7 @@
 plugins {
-	id 'net.fabricmc.fabric-loom' version "${loom_version}"
-	id 'maven-publish'
+	id("net.fabricmc.fabric-loom") version "${loom_version}"
+	id("com.modrinth.minotaur") version "2.9.0"
+	id("maven-publish")
 }
 
 version = "${project.mod_version}+${project.minecraft_version}"
@@ -102,3 +103,18 @@ publishing {
 		// retrieving dependencies.
 	}
 }
+
+modrinth {
+	token.set(System.getenv("MODRINTH") ?: "")
+	syncBodyFrom = rootProject.file("README.md").text
+	projectId = "oxphysics"
+	versionNumber.set(project.version.toString())
+	versionType = "beta"
+	uploadFile = jar
+	gameVersions = ["26.2"]
+	loaders = ["fabric"]
+	dependencies {
+		required.project "fabric-api"
+	}
+}
+tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
