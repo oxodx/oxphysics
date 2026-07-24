@@ -36,6 +36,7 @@ import nl.oxod.oxphysics.bullet.thread.PhysicsThread;
 
 public final class ServerEventHandler {
   private static final Vector3f BLOCK_DISPLAY_CENTER_OFFSET = new Vector3f(0.5f, 0.5f, 0.5f);
+  private static final float BLOCK_DISPLAY_FLOOR_CLEARANCE = 0.005f;
 
   private static PhysicsThread thread;
 
@@ -183,7 +184,8 @@ public final class ServerEventHandler {
         // Keep the display's lower corner aligned with the centre-based
         // collision shape, including while the block is rotating.
         var offset = rotation.toRotationMatrix().mult(BLOCK_DISPLAY_CENTER_OFFSET, new Vector3f());
-        element.absSnapTo(location.x - offset.x, location.y - offset.y, location.z - offset.z);
+        element.absSnapTo(location.x - offset.x, location.y - offset.y + BLOCK_DISPLAY_FLOOR_CLEARANCE,
+            location.z - offset.z);
         var displayAccessor = (nl.oxod.oxphysics.mixin.DisplayAccessor) (Object) display;
         display.getEntityData().set(displayAccessor.getDataLeftRotationId(), Convert.toMinecraft(rotation));
       } else {
