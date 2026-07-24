@@ -71,9 +71,9 @@ public class OxPhysicsSpawnCommands {
       String name) {
     var display = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
 
-    double targetX = pos.x() + 0.5;
-    double targetY = pos.y() + 0.5;
-    double targetZ = pos.z() + 0.5;
+    double targetX = pos.x();
+    double targetY = pos.y();
+    double targetZ = pos.z();
     display.setPos(targetX, targetY, targetZ);
     display.setOldPosAndRot();
 
